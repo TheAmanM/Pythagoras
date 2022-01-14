@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "198152169576",
+    "project_id": "bvsso-a4181",
+    "storage_bucket": "bvsso-a4181.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:198152169576:android:cf9d6f21b98e20ca3173dd",
+        "android_client_info": {
+          "package_name": "com.bvsso.pythagoras_pantheon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "198152169576-pu2er0ja3246m03u5pl4nee1fk3hq6fj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbV7iLcsvTZ_56JByCPFZTVb6qVgC_PqY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "198152169576-pu2er0ja3246m03u5pl4nee1fk3hq6fj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
