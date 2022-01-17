@@ -81,7 +81,7 @@ class Wrapper extends StatelessWidget {
     } else {
       print('sending uid: ${user.uid}');
       return Scaffold(
-        body: ModeratorWrapper(uid: user.uid),
+        body: ModeratorWrapper(user: user),
       );
     }
   }

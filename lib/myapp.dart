@@ -1,13 +1,14 @@
 import 'package:bvsso/auth.dart';
 import 'package:bvsso/constants.dart';
 import 'package:bvsso/database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class ModeratorWrapper extends StatefulWidget {
-  String uid;
+  FirebaseUser user;
   ModeratorWrapper({
-    @required String uid,
+    @required this.user,
   });
 
   @override
@@ -15,19 +16,28 @@ class ModeratorWrapper extends StatefulWidget {
 }
 
 class _ModeratorWrapperState extends State<ModeratorWrapper> {
-  String uid;
+  FirebaseUser user;
+  String userid;
   DatabaseServices databaseServices;
   bool isModerator;
 
+  void setUid() {
+    // print("setting uid: ${widget.uid}");
+    print("user is ${user.toString()}");
+    setState(() {
+      userid = widget.user.uid;
+    });
+  }
+
   void setModerator() async {
-    isModerator = await databaseServices.getIsModerator(uid);
+    print("checking uid is $userid");
+    isModerator = await databaseServices.getIsModerator(userid);
     setState(() {});
   }
 
   @override
   void initState() {
-    uid = widget.uid;
-    print('setting uid to $uid');
+    setUid();
     databaseServices = new DatabaseServices();
     setModerator();
     super.initState();
@@ -35,14 +45,17 @@ class _ModeratorWrapperState extends State<ModeratorWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.uid);
+    print("data sent is ${widget.user.uid}");
     if (isModerator == null) {
       return Spinner();
     } else if (isModerator == false) {
-      return MyApp(uid: uid);
+      return MyApp(uid: widget.user.uid);
     } else {
       return Center(
-        child: Text('Mod perms granted'),
+        child: Text(
+          'Mod perms granted\nYou are a legend',
+          textAlign: TextAlign.center,
+        ),
       );
     }
   }
