@@ -1,10 +1,12 @@
+import 'package:bvsso/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Color mainColor = Color(0xFF003049);
 // Color accentColor = Color(0xFFFABE4C);
 
-Color mainColor = Color(0xFFf49d3b);
+// Color mainColor = Color(0xFFf49d3b);
+Color mainColor = Color(0xFFe9912d);
 Color accentColor = Colors.white;
 Color annoyingRedColor = Colors.red[800];
 
@@ -37,9 +39,9 @@ class Spinner extends StatelessWidget {
   }
 }
 
-Icon customIcon(IconData iconData) {
+Icon customIcon(IconData iconData, bool isAccentColor) {
   return Icon(
     iconData,
-    color: accentColor,
+    color: isAccentColor ? accentColor : mainColor,
   );
 }

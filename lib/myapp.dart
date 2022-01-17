@@ -4,7 +4,56 @@ import 'package:bvsso/database.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
+class ModeratorWrapper extends StatefulWidget {
+  String uid;
+  ModeratorWrapper({
+    @required String uid,
+  });
+
+  @override
+  _ModeratorWrapperState createState() => _ModeratorWrapperState();
+}
+
+class _ModeratorWrapperState extends State<ModeratorWrapper> {
+  String uid;
+  DatabaseServices databaseServices;
+  bool isModerator;
+
+  void setModerator() async {
+    isModerator = await databaseServices.getIsModerator(uid);
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    uid = widget.uid;
+    print('setting uid to $uid');
+    databaseServices = new DatabaseServices();
+    setModerator();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print(widget.uid);
+    if (isModerator == null) {
+      return Spinner();
+    } else if (isModerator == false) {
+      return MyApp(uid: uid);
+    } else {
+      return Center(
+        child: Text('Mod perms granted'),
+      );
+    }
+  }
+}
+
 class MyApp extends StatefulWidget {
+  String uid;
+
+  MyApp({
+    @required uid,
+  });
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -34,6 +83,7 @@ class _MyAppState extends State<MyApp> {
           IconButton(
             icon: customIcon(
               Icons.exit_to_app,
+              true,
             ),
             onPressed: () async {
               await AuthServices().signOut();
@@ -71,7 +121,7 @@ class _MyAppState extends State<MyApp> {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return Home();
+                      return Home(uid: widget.uid);
                     },
                   ),
                 );
@@ -98,6 +148,11 @@ class _MyAppState extends State<MyApp> {
 }
 
 class Home extends StatefulWidget {
+  String uid;
+
+  Home({
+    @required uid,
+  });
   @override
   _HomeState createState() => _HomeState();
 }
@@ -207,7 +262,7 @@ class _HomeState extends State<Home> {
   }
 
   getIsModerator() async {
-    isModerator = await authServices.getIsModerator();
+    isModerator = await databaseServices.getIsModerator(widget.uid);
     setState(() {});
   }
 
@@ -218,10 +273,11 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    authServices = new AuthServices();
-    getIsModerator();
+    // authServices = new AuthServices();
+    // getIsModerator();
     databaseServices = new DatabaseServices();
     getQuestions();
+    getIsModerator();
     super.initState();
   }
 

@@ -34,6 +34,13 @@ class AuthServices {
             message = "Invalid username; such a user does not exist. ";
             break;
           }
+
+        case "ERROR_WRONG_PASSWORD":
+          {
+            message =
+                "Error: Invalid password. Please double-check your password or copy-paste it into the text field. ";
+            break;
+          }
         default:
           {
             message = error.message;
@@ -48,10 +55,5 @@ class AuthServices {
 
   Future<void> signOut() async {
     await _instance.signOut();
-  }
-
-  Future<bool> getIsModerator() async {
-    await Future.delayed(Duration(seconds: 2));
-    return false;
   }
 }
