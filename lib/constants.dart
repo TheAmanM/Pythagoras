@@ -45,3 +45,61 @@ Icon customIcon(IconData iconData, bool isAccentColor) {
     color: isAccentColor ? accentColor : mainColor,
   );
 }
+
+Widget EmptyButton(Function onTap, String text) {
+  double buttonHeight = 10;
+  double buttonWidth = 40;
+
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: buttonWidth,
+        vertical: buttonHeight,
+      ),
+      decoration: BoxDecoration(
+        color: accentColor,
+        borderRadius: BorderRadius.circular(
+          20000,
+        ),
+      ),
+      child: ButtonText(text.toString()),
+    ),
+  );
+}
+
+Widget BackgroundImage({Widget child, bool opacityGradientMode = false}) {
+  return Stack(
+    children: [
+      lowOpacityImage(
+        opacityGradientMode: opacityGradientMode,
+      ),
+      child,
+    ],
+  );
+}
+
+Widget lowOpacityImage({bool opacityGradientMode = false}) => Opacity(
+      opacity: opacityGradientMode ? 0.45 : 0.15,
+      child: SafeArea(
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                // 'assets/images/overlay.png',
+                opacityGradientMode
+                    ? 'assets/images/overlayGradient.png'
+                    : "assets/images/overlay.png",
+              ),
+              fit: BoxFit.cover,
+            ),
+          ),
+          // child: Image.asset(
+          //   'assets/images/overlayGradient2.png',
+          //   // fit: BoxFit.cover,
+          //   // width: double.infinity,
+          //   height: double.infinity,
+          // ),
+        ),
+      ),
+    );

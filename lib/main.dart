@@ -58,7 +58,7 @@ void main() {
           textTheme: TextTheme(
             bodyText2: TextStyle(
               color: accentColor,
-              fontSize: 18,
+              fontSize: 15,
             ),
           ),
         ),
@@ -104,6 +104,11 @@ class _AuthenticateState extends State<Authenticate> {
   @override
   void initState() {
     super.initState();
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      // DeviceOrientation.landscapeLeft,
+    ]);
 
     userNameError = null;
     passwordError = null;
@@ -181,6 +186,7 @@ class _AuthenticateState extends State<Authenticate> {
       ),
       child: TextField(
         style: TextStyle(
+          // fontSize: 14,
           color: accentColor,
         ),
         // onChanged: (String input) {
@@ -191,8 +197,10 @@ class _AuthenticateState extends State<Authenticate> {
         obscureText: isPassword,
         controller: textEditingController,
         decoration: InputDecoration(
-          fillColor: Colors.white.withOpacity(0.15),
-          // filled: true,
+          isDense: true,
+          // fillColor: Colors.white.withOpacity(0.15),
+          fillColor: mainColor.withOpacity(0.6),
+          filled: true,
           errorText: errorText,
           labelText: fieldName,
           labelStyle: TextStyle(
@@ -217,113 +225,146 @@ class _AuthenticateState extends State<Authenticate> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      Expanded(
-        child: Center(
-          child: FractionallySizedBox(
-            widthFactor: 1.4,
-            child: Image(
-              image: AssetImage(
-                'assets/images/icon3.png',
-              ),
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-      ),
-      customTextField(
-        'Username',
-        usernameEditingController,
-        userNameError,
-        Icons.person,
-        TextInputType.text,
-        false,
-      ),
-      customTextField(
-        'Password',
-        passwordEditingController,
-        passwordError,
-        Icons.lock,
-        TextInputType.text,
-        true,
-      ),
-      // TextField(
-      //   decoration: InputDecoration(
-      //     border: OutlineInputBorder(
-      //       borderSide: BorderSide(
-      //         color: Colors.white,
-      //       ),
-      //       borderRadius: BorderRadius.circular(200),
-      //     ),
-      //   ),
-      // ),
-      Padding(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          8,
-          16,
-          24,
-        ),
-        child:
-            /* Container(
-          // width: MediaQuery.of(context).size.width,
-          height: 48,
-          decoration: BoxDecoration(
-            color: accentColor,
-            borderRadius: BorderRadius.circular(
-              2000,
-            ),
-          ),
-          child: Center(
-            child: ButtonText(
-              'Login',
-            ),
-          ),
-        ), */
-            Opacity(
-          opacity: isButtonEnabled ? 1.0 : 0.5,
-          child: FlatButton(
-            color: accentColor,
-            height: 52,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                1000,
+    // return Stack(
+    // alignment: Alignment.bottomCenter,
+    // children: [
+    //   Opacity(
+    //     opacity: 0.45,
+    //     child: SafeArea(
+    //       child: Container(
+    //         decoration: BoxDecoration(
+    //           image: DecorationImage(
+    //             image: AssetImage(
+    //               // 'assets/images/overlay.png',
+    //               'assets/images/overlayGradient.png',
+    //             ),
+    //             fit: BoxFit.cover,
+    //           ),
+    //         ),
+    //         // child: Image.asset(
+    //         //   'assets/images/overlayGradient2.png',
+    //         //   // fit: BoxFit.cover,
+    //         //   // width: double.infinity,
+    //         //   height: double.infinity,
+    //         // ),
+    //       ),
+    //     ),
+    //   ),
+    return BackgroundImage(
+      opacityGradientMode: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Center(
+              child: FractionallySizedBox(
+                // widthFactor: 1.4,
+                widthFactor: 0.75,
+                heightFactor: 0.625,
+                child: Image(
+                  image: AssetImage(
+                    'assets/images/icon3.png',
+                  ),
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-            onPressed: () async {
-              if (isButtonEnabled) {
-                if (validateUserName() & validatePassword()) {
-                  setState(() {
-                    isButtonEnabled = false;
-                  });
-                  List result = await AuthServices().signIn(
-                    usernameEditingController.text,
-                    passwordEditingController.text,
-                  );
-                  setState(() {
-                    isButtonEnabled = true;
-                  });
-                  if (result[1] != null) {
-                    Scaffold.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          result[1].toString(),
-                        ),
-                      ),
-                    );
+          ),
+          customTextField(
+            'Username',
+            usernameEditingController,
+            userNameError,
+            Icons.person,
+            TextInputType.text,
+            false,
+          ),
+          customTextField(
+            'Password',
+            passwordEditingController,
+            passwordError,
+            Icons.lock,
+            TextInputType.text,
+            true,
+          ),
+          // TextField(
+          //   decoration: InputDecoration(
+          //     border: OutlineInputBorder(
+          //       borderSide: BorderSide(
+          //         color: Colors.white,
+          //       ),
+          //       borderRadius: BorderRadius.circular(200),
+          //     ),
+          //   ),
+          // ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              8,
+              16,
+              24,
+            ),
+            child:
+                /* Container(
+              // width: MediaQuery.of(context).size.width,
+              height: 48,
+              decoration: BoxDecoration(
+                color: accentColor,
+                borderRadius: BorderRadius.circular(
+                  2000,
+                ),
+              ),
+              child: Center(
+                child: ButtonText(
+                  'Login',
+                ),
+              ),
+            ), */
+                Opacity(
+              opacity: isButtonEnabled ? 1.0 : 0.5,
+              child: FlatButton(
+                color: accentColor,
+                height: 52,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    1000,
+                  ),
+                ),
+                onPressed: () async {
+                  if (isButtonEnabled) {
+                    if (validateUserName() & validatePassword()) {
+                      setState(() {
+                        isButtonEnabled = false;
+                      });
+                      List result = await AuthServices().signIn(
+                        usernameEditingController.text,
+                        passwordEditingController.text,
+                      );
+                      setState(() {
+                        isButtonEnabled = true;
+                      });
+                      if (result[1] != null) {
+                        Scaffold.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              result[1].toString(),
+                            ),
+                          ),
+                        );
+                      }
+                    }
                   }
-                }
-              }
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ButtonText('Login', bold: true),
-              ],
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ButtonText('Login', bold: true),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
-    ]);
+    );
   }
 }
