@@ -320,7 +320,7 @@ class _AuthenticateState extends State<Authenticate> {
               ),
             ), */
                 Opacity(
-              opacity: isButtonEnabled ? 1.0 : 0.5,
+              opacity: isButtonEnabled ? 1.0 : 0.4,
               child: FlatButton(
                 color: accentColor,
                 height: 52,

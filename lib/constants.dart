@@ -79,6 +79,17 @@ Widget BackgroundImage({Widget child, bool opacityGradientMode = false}) {
   );
 }
 
+void CustomSnackBar(BuildContext context, {String text}) {
+  Scaffold.of(context).showSnackBar(
+    SnackBar(
+      content: Text(text),
+      duration: Duration(
+        seconds: 3,
+      ),
+    ),
+  );
+}
+
 Widget lowOpacityImage({bool opacityGradientMode = false}) => Opacity(
       opacity: opacityGradientMode ? 0.45 : 0.15,
       child: SafeArea(

@@ -126,22 +126,33 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  bool enableRound1;
+  String round1Text = "";
+
   @override
   void initState() {
+    // _controller = VideoPlayerController.network(
+    //   'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
+    //   // 'https://www.youtube.com/watch?v=jZBDluCITmE',
+    // )..initialize().then((_) {
+    //     // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+    //     setState(() {});
+    //   });
+    setEnableRound1();
     super.initState();
-    _controller = VideoPlayerController.network(
-      'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
-      // 'https://www.youtube.com/watch?v=jZBDluCITmE',
-    )..initialize().then((_) {
-        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-        setState(() {});
-      });
+  }
+
+  void setEnableRound1() async {
+    Map round1Data = await DatabaseServices().getRound1Data();
+    enableRound1 = round1Data["enableRound1"];
+    round1Text = round1Data["introText"];
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark,
+      value: SystemUiOverlayStyle.light,
       child: Scaffold(
         /* appBar: !youtubePlayerController.value.isFullScreen
             ? AppBar(
@@ -162,21 +173,22 @@ class _MyAppState extends State<MyApp> {
             // : Container(),
             : null, */
         body: BackgroundImage(
-          child: YoutubePlayerBuilder(
-            onEnterFullScreen: () {
-              setState(() {});
-            },
-            onExitFullScreen: () {
-              setState(() {});
-            },
-            player: YoutubePlayer(
-              aspectRatio: 16.0 / 9.0,
-              controller: youtubePlayerController,
-              progressIndicatorColor: Colors.lime,
-              progressColors: ProgressBarColors(
-                playedColor: mainColor,
-                handleColor: mainColor,
-              ),
+          child:
+              // YoutubePlayerBuilder(
+              //   onEnterFullScreen: () {
+              //     setState(() {});
+              //   },
+              //   onExitFullScreen: () {
+              //     setState(() {});
+              //   },
+              //   player: YoutubePlayer(
+              //     aspectRatio: 16.0 / 9.0,
+              //     controller: youtubePlayerController,
+              //     progressIndicatorColor: Colors.lime,
+              //     progressColors: ProgressBarColors(
+              //       playedColor: mainColor,
+              //       handleColor: mainColor,
+              //     ),
               // topActions: [
               //   Text(
               //     "BVS Science Olympiad",
@@ -200,21 +212,36 @@ class _MyAppState extends State<MyApp> {
               //   FullScreenButton()
               //   // TotalDuration(),
               // ],
-            ),
-            builder: (context, player) =>
-                NotificationListener<OverscrollIndicatorNotification>(
-              onNotification: (overscroll) {
-                overscroll.disallowGlow();
-              },
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 18),
-                  child: Column(
-                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (!youtubePlayerController.value.isFullScreen)
-                        AppBar(
+              // ),
+              // builder: (context, player) =>
+              enableRound1 != null
+                  ? SafeArea(
+                      child:
+                          NotificationListener<OverscrollIndicatorNotification>(
+                        onNotification: (overscroll) {
+                          overscroll.disallowGlow();
+                        },
+                        child: SingleChildScrollView(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 18),
+                            child: Column(
+                              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (!youtubePlayerController.value.isFullScreen)
+                                  Align(
+                                    alignment: Alignment.topRight,
+                                    child: IconButton(
+                                      icon: customIcon(
+                                        Icons.exit_to_app,
+                                        true,
+                                      ),
+                                      onPressed: () async {
+                                        await AuthServices().signOut();
+                                      },
+                                    ),
+                                  ),
+                                /* AppBar(
                           elevation: 0,
                           backgroundColor: mainColor,
                           actions: [
@@ -228,8 +255,8 @@ class _MyAppState extends State<MyApp> {
                               },
                             )
                           ],
-                        ),
-                      /* Padding(
+                        ), */
+                                /* Padding(
                   child: _controller.value.initialized
                       ? /* GestureDetector(
                           child: AspectRatio(
@@ -263,94 +290,120 @@ class _MyAppState extends State<MyApp> {
                     16,
                   ),
                 ), */
-                      Center(
-                        child: FractionallySizedBox(
-                          widthFactor: 0.6,
-                          child: Image(
-                            image: AssetImage(
-                              'assets/images/icon3.png',
+                                Center(
+                                  child: FractionallySizedBox(
+                                    widthFactor: 0.6,
+                                    child: Image(
+                                      image: AssetImage(
+                                        'assets/images/icon3.png',
+                                      ),
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 32),
+                                Text(
+                                  round1Text.split("\\n").join("\n"),
+                                ),
+                                // SizedBox(height: 12),
+                                // Text(
+                                //     "This app will host the various challenges that you will face in the module. We have two pieces of great news for you. The first is that since you see this text, our app works as intended, which is fantastic! Secondly, as the team who watched our ideas develop from simple thoughts to complex inventions, we are thrilled and exhillerated to see you oscillate between having fun in our module to grinding through questions."),
+                                // SizedBox(height: 12),
+                                // Text(
+                                //   "Ofcourse, we wish you the very best. See you on the other side! 😁",
+                                // ),
+                                // SizedBox(height: 12),
+                                RichText(
+                                  text: TextSpan(
+                                    style:
+                                        Theme.of(context).textTheme.bodyText2,
+                                    // style: TextStyle(
+                                    //   fontSize: 15,
+                                    // ),
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        text:
+                                            'We have uploaded an introduction video on YouTube, which you can watch ',
+                                      ),
+                                      TextSpan(
+                                        text: 'here',
+                                        style: TextStyle(
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: '. ',
+                                        // style: TextStyle(
+                                        // decoration: TextDecoration.underline,
+                                        // ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // SizedBox(height: 48),
+                                // Padding(
+                                //   padding: youtubePlayerController.value.isFullScreen
+                                //       ? EdgeInsets.all(8.0)
+                                //       : EdgeInsets.zero,
+                                //   child: player,
+                                // ),
+                                SizedBox(height: 36),
+                                Opacity(
+                                  opacity: enableRound1 ? 1.0 : 0.4,
+                                  child: Center(
+                                    child: GestureDetector(
+                                      onTap: enableRound1
+                                          ? () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) {
+                                                    return Home(
+                                                        uid: widget.uid);
+                                                  },
+                                                ),
+                                              );
+                                            }
+                                          : () {
+                                              //   Scaffold.of(context).showSnackBar(
+                                              //     SnackBar(
+                                              //       content: Text(
+                                              //         'Sorry, Round 1 has not begun yet. Please stay updated on our Discord server to find out more. ',
+                                              //       ),
+                                              //       duration:
+                                              //           Duration(seconds: 3),
+                                              //     ),
+                                              //   );
+                                              CustomSnackBar(
+                                                context,
+                                                text:
+                                                    "Round 1 has not begun yet. Please stay updated on our Discord server to find out more. ",
+                                              );
+                                            },
+                                      child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 40,
+                                            vertical: 10,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: accentColor,
+                                            borderRadius: BorderRadius.circular(
+                                              20000,
+                                            ),
+                                          ),
+                                          child: ButtonText('Start')),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 32),
+                              ],
                             ),
-                            fit: BoxFit.contain,
                           ),
                         ),
                       ),
-                      SizedBox(height: 32),
-                      Text(
-                        "Welcome to the Pythagoras' Pantheon app!\n\nThis app will host the various challenges that you will face in the module. We have two pieces of great news for you. The first is that since you see this text, our app works as intended, which is fantastic! Secondly, as the team who watched our ideas develop from simple thoughts to complex inventions, we are thrilled and exhillerated to see you oscillate between having fun in our module to grinding through questions.\n\nOf course, we wish you the very best. See you on the other side! 😁\n",
-                      ),
-                      // SizedBox(height: 12),
-                      // Text(
-                      //     "This app will host the various challenges that you will face in the module. We have two pieces of great news for you. The first is that since you see this text, our app works as intended, which is fantastic! Secondly, as the team who watched our ideas develop from simple thoughts to complex inventions, we are thrilled and exhillerated to see you oscillate between having fun in our module to grinding through questions."),
-                      // SizedBox(height: 12),
-                      // Text(
-                      //   "Ofcourse, we wish you the very best. See you on the other side! 😁",
                       // ),
-                      // SizedBox(height: 12),
-                      RichText(
-                        text: TextSpan(
-                          style: Theme.of(context).textTheme.bodyText2,
-                          children: <TextSpan>[
-                            TextSpan(
-                              text:
-                                  'We have uploaded an introduction video on YouTube, which you can watch ',
-                            ),
-                            TextSpan(
-                              text: 'here',
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                            TextSpan(
-                              text: '. ',
-                              // style: TextStyle(
-                              // decoration: TextDecoration.underline,
-                              // ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // SizedBox(height: 48),
-                      // Padding(
-                      //   padding: youtubePlayerController.value.isFullScreen
-                      //       ? EdgeInsets.all(8.0)
-                      //       : EdgeInsets.zero,
-                      //   child: player,
-                      // ),
-                      SizedBox(height: 36),
-                      Center(
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return Home(uid: widget.uid);
-                                },
-                              ),
-                            );
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 40,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: accentColor,
-                              borderRadius: BorderRadius.circular(
-                                20000,
-                              ),
-                            ),
-                            child: ButtonText('Start'),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 32),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+                    )
+                  : Spinner(),
         ),
       ),
     );
@@ -371,13 +424,18 @@ class _HomeState extends State<Home> {
   AuthServices authServices;
   bool isModerator;
   DatabaseServices databaseServices;
-  Map<String, List<String>> roomLocations = {};
-  Map<int, Map<String, List<String>>> roomLocationsCollection = {};
-  Map<String, String> roomNames = {};
-  Map<int, Map<String, String>> roomNamesCollection = {};
+  // Map<String, List<String>> roomLocations = {};
+  Map roomLocations = {};
+  // Map<String, Map<String, List<String>>> roomLocationsCollection = {};
+  Map roomLocationsCollection = {};
+  // Map<String, String> roomNames = {};
+  Map roomNames = {};
+  // Map<String, Map<String, String>> roomNamesCollection = {};
+  Map roomNamesCollection = {};
+  // Map<String, Map<String, String>> questionsCollection = {};
+  Map questionsCollection = {};
 
   int currentFloor = 1;
-
   String userState = "";
 
   stateCombine(String direction) {
@@ -410,6 +468,7 @@ class _HomeState extends State<Home> {
                   userState = userState.substring(0, userState.length - 1);
                 },
               );
+              checkForQuestion(context);
             },
             'Back',
             /* child: Container(
@@ -451,6 +510,7 @@ class _HomeState extends State<Home> {
                   userState = stateCombine(direction);
                 },
               );
+              checkForQuestion(context);
             },
             // '$direction',
             // 'TBD',
@@ -499,28 +559,36 @@ class _HomeState extends State<Home> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  if (roomLocationsCollection.containsKey(currentFloor + 1))
+                  if (roomLocationsCollection
+                      .containsKey((currentFloor + 1).toString()))
                     EmptyButton(() {
                       setState(() {
                         currentFloor++;
-                        roomLocations = roomLocationsCollection[currentFloor];
-                        roomNames = roomNamesCollection[currentFloor];
+                        roomLocations =
+                            roomLocationsCollection[currentFloor.toString()];
+                        roomNames =
+                            roomNamesCollection[currentFloor.toString()];
                         userState = "";
                       });
+                      checkForQuestion(context);
                     }, "Next floor"),
                   Text(
                     // userState,
                     "\nCurrent Floor: $currentFloor\nRoom: Lobby\n",
                     textAlign: TextAlign.center,
                   ),
-                  if (roomLocationsCollection.containsKey(currentFloor - 1))
+                  if (roomLocationsCollection
+                      .containsKey((currentFloor - 1).toString()))
                     EmptyButton(() {
                       setState(() {
                         currentFloor--;
-                        roomLocations = roomLocationsCollection[currentFloor];
-                        roomNames = roomNamesCollection[currentFloor];
+                        roomLocations =
+                            roomLocationsCollection[currentFloor.toString()];
+                        roomNames =
+                            roomNamesCollection[currentFloor.toString()];
                         userState = "";
                       });
+                      checkForQuestion(context);
                     }, "Previous floor"),
                 ],
               )
@@ -547,16 +615,59 @@ class _HomeState extends State<Home> {
     setState(() {});
   }
 
+/*   getQuestions() async {
+    questionsCollection = await databaseServices.getQuestions();
+    setState(() {});
+  }
+
   getRoomNames() async {
     roomNamesCollection = await databaseServices.getRoomNames();
-    roomNames = roomNamesCollection[currentFloor];
+    roomNames = roomNamesCollection[currentFloor.toString()];
     setState(() {});
   }
 
   getRoomLocations() async {
     roomLocationsCollection = await databaseServices.getRoomLocations();
-    roomLocations = roomLocationsCollection[currentFloor];
+    roomLocations = roomLocationsCollection[currentFloor.toString()];
     setState(() {});
+  } */
+
+  void setData() async {
+    List result = await databaseServices.getData();
+    roomLocationsCollection = result[0];
+    roomLocations = roomLocationsCollection["1"];
+
+    roomNamesCollection = result[1];
+    roomNames = roomNamesCollection[currentFloor.toString()];
+
+    questionsCollection = result[2];
+
+    checkForQuestion(context);
+
+    setState(() {});
+  }
+
+  void checkForQuestion(BuildContext context) async {
+    await Future.delayed(
+      Duration(
+        milliseconds: 10,
+      ),
+    );
+    if (questionsCollection[currentFloor.toString()].containsKey(userState)) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Container(
+              child: Image.network(
+                questionsCollection[currentFloor.toString()][userState],
+              ),
+            ),
+            contentPadding: EdgeInsets.zero,
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -564,9 +675,9 @@ class _HomeState extends State<Home> {
     // authServices = new AuthServices();
     // getIsModerator();
     databaseServices = new DatabaseServices();
-    getRoomNames();
-    getRoomLocations();
     getIsModerator();
+
+    setData();
     super.initState();
   }
 
@@ -586,6 +697,7 @@ class _HomeState extends State<Home> {
           ),
         );
       } else {
+        // checkForQuestion(context);
         return Scaffold(
           body: Stack(
             children: [
