@@ -467,30 +467,32 @@ class _HomeState extends State<Home> {
     String directionState = roomLocations[userState][int.parse(direction)];
     // print("directionState: $directionState");
     if (directionState == null) {
-      return Container(
-        child: Align(
-          alignment: alignment,
-          child: Transform.translate(
-            offset: Offset.zero,
-            // offset: offset,
-            child: Transform.rotate(
-              // angle: int.parse(direction) % 2 == 0 ? 0 : -math.pi / 2,
-              angle: 0,
-              child: RotatedBox(
-                quarterTurns:
-                    int.parse(direction) % 2 == 0 ? 0 : -int.parse(direction),
-                child: Text('${directionState.toString()} value'),
-              ),
-            ),
-          ),
-        ),
-      );
+      return Container();
+
+      //   return Container(
+      //     child: Align(
+      //       alignment: alignment,
+      //       child: Transform.translate(
+      //         offset: Offset.zero,
+      //         // offset: offset,
+      //         child: Transform.rotate(
+      //           // angle: int.parse(direction) % 2 == 0 ? 0 : -math.pi / 2,
+      //           angle: 0,
+      //           child: RotatedBox(
+      //             quarterTurns:
+      //                 int.parse(direction) % 2 == 0 ? 0 : -int.parse(direction),
+      //             child: Text('${directionState.toString()} value'),
+      //           ),
+      //         ),
+      //       ),
+      //     ),
+      //   );
     } else if (directionState == "Back") {
-      if (userState == "3" && direction == "1") {
-        print("its $direction and $userState");
-        print('$directionState');
-        return Text('HIIIIIIIII');
-      }
+      // if (userState == "3" && direction == "1") {
+      //   print("its $direction and $userState");
+      //   print('$directionState');
+      //   return Text('HIIIIIIIII');
+      // }
       // print('Back');
       // double offsetFactor = 45;
       // Offset offset = new Offset(0, 0);
@@ -543,44 +545,41 @@ class _HomeState extends State<Home> {
         offset = Offset(-offsetFactor, 0);
       }
 
-      return Container(
-        color: Colors.lime,
-        child: Align(
-          alignment: alignment,
-          child:
-              // Align(
-              //   alignment: direction == "1"
-              //       ? Alignment.centerLeft
-              //       : direction == "3"
-              //           ? Alignment.centerRight
-              //           : direction == "0"
-              //               ? Alignment.topCenter
-              //               : Alignment.bottomCenter,
-              //   child:
-              Transform.translate(
-            offset: Offset.zero,
-            // offset: offset,
-            child: Transform.rotate(
-              // angle: int.parse(direction) % 2 == 0 ? 0 : -math.pi / 2,
-              angle: 0,
-              child: RotatedBox(
-                quarterTurns:
-                    int.parse(direction) % 2 == 0 ? 0 : -int.parse(direction),
-                child: EmptyButton(
-                  () {
-                    setState(
-                      () {
-                        // userState = userState.substring(0, userState.length - 1);
-                        userState = stateCombine(direction);
-                      },
-                    );
-                    // checkForQuestion(context);
-                  },
-                  // '$direction',
-                  // 'TBD',
-                  // "${roomNames["${stateCombine(direction)}"]}${stateCombine(direction)}",
-                  "${roomNames["${stateCombine(direction)}"]}",
-                ),
+      return Align(
+        alignment: alignment,
+        child:
+            // Align(
+            //   alignment: direction == "1"
+            //       ? Alignment.centerLeft
+            //       : direction == "3"
+            //           ? Alignment.centerRight
+            //           : direction == "0"
+            //               ? Alignment.topCenter
+            //               : Alignment.bottomCenter,
+            //   child:
+            Transform.translate(
+          offset: Offset.zero,
+          // offset: offset,
+          child: Transform.rotate(
+            // angle: int.parse(direction) % 2 == 0 ? 0 : -math.pi / 2,
+            angle: 0,
+            child: RotatedBox(
+              quarterTurns:
+                  int.parse(direction) % 2 == 0 ? 0 : -int.parse(direction),
+              child: EmptyButton(
+                () {
+                  setState(
+                    () {
+                      // userState = userState.substring(0, userState.length - 1);
+                      userState = stateCombine(direction);
+                    },
+                  );
+                  // checkForQuestion(context);
+                },
+                // '$direction',
+                // 'TBD',
+                // "${roomNames["${stateCombine(direction)}"]}${stateCombine(direction)}",
+                "${roomNames["${stateCombine(direction)}"]}",
               ),
             ),
           ),
@@ -591,30 +590,27 @@ class _HomeState extends State<Home> {
   }
 
   Widget roomsDisplay() {
-    return Container(
-      color: Colors.orange,
-      child: Padding(
-        padding: EdgeInsets.all(32),
-        child: Stack(
-          children: [
-            CustomButton(
-              "0",
-              Alignment.topCenter,
-            ),
-            CustomButton(
-              "1",
-              Alignment.centerRight,
-            ),
-            CustomButton(
-              "2",
-              Alignment.bottomCenter,
-            ),
-            CustomButton(
-              "3",
-              Alignment.centerLeft,
-            ),
-          ],
-        ),
+    return Padding(
+      padding: EdgeInsets.all(32),
+      child: Stack(
+        children: [
+          CustomButton(
+            "0",
+            Alignment.topCenter,
+          ),
+          CustomButton(
+            "1",
+            Alignment.centerRight,
+          ),
+          CustomButton(
+            "2",
+            Alignment.bottomCenter,
+          ),
+          CustomButton(
+            "3",
+            Alignment.centerLeft,
+          ),
+        ],
       ),
     );
   }
