@@ -10,12 +10,12 @@ Color mainColor = Color(0xFFe9912d);
 Color accentColor = Colors.white;
 Color annoyingRedColor = Colors.red[800];
 
-Widget ButtonText(String text, {bool bold}) {
+Widget ButtonText(String text, {bool bold, bool inverse = false}) {
   if (bold == true) {
     return Text(
       text,
       style: TextStyle(
-        color: mainColor,
+        color: inverse ? accentColor : mainColor,
         fontSize: 18,
         fontWeight: FontWeight.bold,
       ),
@@ -24,7 +24,7 @@ Widget ButtonText(String text, {bool bold}) {
     return Text(
       text,
       style: TextStyle(
-        color: mainColor,
+        color: inverse ? accentColor : mainColor,
       ),
     );
   }
@@ -46,7 +46,7 @@ Icon customIcon(IconData iconData, bool isAccentColor) {
   );
 }
 
-Widget EmptyButton(Function onTap, String text) {
+Widget EmptyButton(Function onTap, String text, {bool inverse = false}) {
   double buttonHeight = 10;
   double buttonWidth = 40;
 
@@ -58,12 +58,12 @@ Widget EmptyButton(Function onTap, String text) {
         vertical: buttonHeight,
       ),
       decoration: BoxDecoration(
-        color: accentColor,
+        color: inverse ? mainColor : accentColor,
         borderRadius: BorderRadius.circular(
           20000,
         ),
       ),
-      child: ButtonText(text.toString()),
+      child: ButtonText(text.toString(), inverse: inverse),
     ),
   );
 }
@@ -114,3 +114,106 @@ Widget lowOpacityImage({bool opacityGradientMode = false}) => Opacity(
         ),
       ),
     );
+
+Widget customTextField(
+  String fieldName,
+  TextEditingController textEditingController,
+  String errorText,
+  IconData iconData,
+  TextInputType inputType,
+  bool isPassword,
+) {
+  OutlineInputBorder outlineInputBorder = OutlineInputBorder(
+    borderSide: BorderSide(
+      color: Colors.white,
+      width: 1.5,
+    ),
+    borderRadius: BorderRadius.circular(
+      2000,
+    ),
+  );
+  OutlineInputBorder errorBorder = outlineInputBorder.copyWith(
+    borderSide: BorderSide(
+      color: Colors.red,
+      width: 1.5,
+    ),
+  );
+  return Padding(
+    padding: EdgeInsets.fromLTRB(
+      16,
+      0,
+      16,
+      12,
+    ),
+    child: TextField(
+      style: TextStyle(
+        // fontSize: 14,
+        color: accentColor,
+      ),
+      // onChanged: (String input) {
+      //   resetErrorMessages();
+      // },
+      // cursorColor: mainColor,
+      cursorColor: accentColor,
+      obscureText: isPassword,
+      controller: textEditingController,
+      decoration: InputDecoration(
+        isDense: true,
+        // fillColor: Colors.white.withOpacity(0.15),
+        fillColor: mainColor.withOpacity(0.6),
+        filled: true,
+        errorText: errorText,
+        labelText: fieldName,
+        labelStyle: TextStyle(
+          // color: mainColor,
+          color: accentColor.withOpacity(0.6),
+        ),
+        border: outlineInputBorder,
+        enabledBorder: outlineInputBorder,
+        focusedBorder: outlineInputBorder,
+        errorBorder: errorBorder,
+        prefixIcon: customIcon(
+          iconData,
+          // color: accentColor,
+          // false,
+          true,
+        ),
+      ),
+      keyboardType: inputType,
+    ),
+  );
+}
+
+Widget EmptyTextField(String label, TextEditingController controller,
+    {TextInputType keyboardType = TextInputType.number}) {
+  OutlineInputBorder outlineInputBorder = OutlineInputBorder(
+    borderSide: BorderSide(
+      color: mainColor,
+      width: 1.5,
+    ),
+    borderRadius: BorderRadius.circular(
+      2000,
+    ),
+  );
+  return Padding(
+    padding: EdgeInsets.fromLTRB(
+      0,
+      0,
+      0,
+      12,
+    ),
+    child: TextField(
+      keyboardType: keyboardType,
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: mainColor.withOpacity(0.6)),
+        // isDense: true,
+        border: outlineInputBorder,
+        contentPadding: EdgeInsets.fromLTRB(24, 8, 12, 8),
+        enabledBorder: outlineInputBorder,
+        focusedBorder: outlineInputBorder,
+      ),
+    ),
+  );
+}

@@ -1,14 +1,17 @@
 import 'package:bvsso/auth.dart';
 import 'package:bvsso/constants.dart';
 import 'package:bvsso/database.dart';
-import 'package:bvsso/main.dart';
+import 'package:flutter/cupertino.dart';
+// import 'package:bvsso/main.dart';
+import 'credits.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:math' as math;
 
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+// import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class ModeratorWrapper extends StatefulWidget {
   FirebaseUser user;
@@ -91,14 +94,14 @@ class MyApp extends StatefulWidget {
   String uid;
 
   MyApp({
-    @required uid,
+    @required this.uid,
   });
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  VideoPlayerController _controller;
+/*   VideoPlayerController _controller;
 
   YoutubePlayerController youtubePlayerController = YoutubePlayerController(
     // initialVideoId: 'bOHslUK2E5w',
@@ -109,13 +112,12 @@ class _MyAppState extends State<MyApp> {
       hideThumbnail: true,
       // hideControls: true,
     ),
-  );
+  ); */
 
-  bool _isPlayerReady = false;
-  PlayerState _playerState;
-  YoutubeMetaData _videoMetaData;
+  // PlayerState _playerState;
+  // YoutubeMetaData _videoMetaData;
 
-  void listener() {
+  /* void listener() {
     if (_isPlayerReady &&
         mounted &&
         !youtubePlayerController.value.isFullScreen) {
@@ -124,10 +126,17 @@ class _MyAppState extends State<MyApp> {
         _videoMetaData = youtubePlayerController.metadata;
       });
     }
-  }
+  } */
 
   bool enableRound1;
   String round1Text = "";
+
+  String name;
+
+  void setName() async {
+    name = await DatabaseServices().getUserName(widget.uid);
+    setState(() {});
+  }
 
   @override
   void initState() {
@@ -138,6 +147,7 @@ class _MyAppState extends State<MyApp> {
     //     // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
     //     setState(() {});
     //   });
+    setName();
     setEnableRound1();
     super.initState();
   }
@@ -214,7 +224,7 @@ class _MyAppState extends State<MyApp> {
               // ],
               // ),
               // builder: (context, player) =>
-              enableRound1 != null
+              enableRound1 != null && name != null
                   ? SafeArea(
                       child:
                           NotificationListener<OverscrollIndicatorNotification>(
@@ -228,19 +238,19 @@ class _MyAppState extends State<MyApp> {
                               // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (!youtubePlayerController.value.isFullScreen)
-                                  Align(
-                                    alignment: Alignment.topRight,
-                                    child: IconButton(
-                                      icon: customIcon(
-                                        Icons.exit_to_app,
-                                        true,
-                                      ),
-                                      onPressed: () async {
-                                        await AuthServices().signOut();
-                                      },
+                                // if (!youtubePlayerController.value.isFullScreen)
+                                Align(
+                                  alignment: Alignment.topRight,
+                                  child: IconButton(
+                                    icon: customIcon(
+                                      Icons.exit_to_app,
+                                      true,
                                     ),
+                                    onPressed: () async {
+                                      await AuthServices().signOut();
+                                    },
                                   ),
+                                ),
                                 /* AppBar(
                           elevation: 0,
                           backgroundColor: mainColor,
@@ -303,16 +313,11 @@ class _MyAppState extends State<MyApp> {
                                 ),
                                 SizedBox(height: 32),
                                 Text(
-                                  round1Text.split("\\n").join("\n"),
+                                  round1Text
+                                      .split("\\n")
+                                      .join("\n")
+                                      .replaceAll(RegExp('<name>'), '$name'),
                                 ),
-                                // SizedBox(height: 12),
-                                // Text(
-                                //     "This app will host the various challenges that you will face in the module. We have two pieces of great news for you. The first is that since you see this text, our app works as intended, which is fantastic! Secondly, as the team who watched our ideas develop from simple thoughts to complex inventions, we are thrilled and exhillerated to see you oscillate between having fun in our module to grinding through questions."),
-                                // SizedBox(height: 12),
-                                // Text(
-                                //   "Ofcourse, we wish you the very best. See you on the other side! 😁",
-                                // ),
-                                // SizedBox(height: 12),
                                 RichText(
                                   text: TextSpan(
                                     style:
@@ -356,7 +361,7 @@ class _MyAppState extends State<MyApp> {
                                           ? () {
                                               Navigator.push(
                                                 context,
-                                                MaterialPageRoute(
+                                                CupertinoPageRoute(
                                                   builder: (context) {
                                                     return Home(
                                                         uid: widget.uid);
@@ -414,7 +419,7 @@ class Home extends StatefulWidget {
   String uid;
 
   Home({
-    @required uid,
+    @required this.uid,
   });
   @override
   _HomeState createState() => _HomeState();
@@ -435,6 +440,8 @@ class _HomeState extends State<Home> {
   // Map<String, Map<String, String>> questionsCollection = {};
   Map questionsCollection = {};
 
+  Map answersCollection = {};
+
   int currentFloor = 1;
   String userState = "";
 
@@ -442,25 +449,63 @@ class _HomeState extends State<Home> {
     return "$userState$direction";
   }
 
-  Widget CustomButton(String direction /* Should be 0, 1, 2 or 3*/) {
+  List<int> answerCheckFormat(/* Map<String, String> */ ans) {
+    List<int> returnAnswer = [];
+    for (String key in ans.keys) {
+      print('ANSWER CHECK FORMAT');
+      print(ans);
+      print(key);
+      print(ans[key.toString()].runtimeType);
+      returnAnswer.add(ans[key.toString()]);
+    }
+    return returnAnswer;
+  }
+
+  Widget CustomButton(
+      String direction /* Should be 0, 1, 2 or 3*/, Alignment alignment) {
     // print("direction is $direction");
     String directionState = roomLocations[userState][int.parse(direction)];
+    // print("directionState: $directionState");
     if (directionState == null) {
-      return Container();
+      return Container(
+        child: Align(
+          alignment: alignment,
+          child: Transform.translate(
+            offset: Offset.zero,
+            // offset: offset,
+            child: Transform.rotate(
+              // angle: int.parse(direction) % 2 == 0 ? 0 : -math.pi / 2,
+              angle: 0,
+              child: RotatedBox(
+                quarterTurns:
+                    int.parse(direction) % 2 == 0 ? 0 : -int.parse(direction),
+                child: Text('${directionState.toString()} value'),
+              ),
+            ),
+          ),
+        ),
+      );
     } else if (directionState == "Back") {
-      double offsetFactor = 45;
-      Offset offset = new Offset(0, 0);
-
-      if (direction == "1") {
-        offset = Offset(offsetFactor, 0);
-      } else if (direction == "3") {
-        offset = Offset(-offsetFactor, 0);
+      if (userState == "3" && direction == "1") {
+        print("its $direction and $userState");
+        print('$directionState');
+        return Text('HIIIIIIIII');
       }
+      // print('Back');
+      // double offsetFactor = 45;
+      // Offset offset = new Offset(0, 0);
 
-      return Transform.translate(
-        offset: offset,
-        child: Transform.rotate(
-          angle: int.parse(direction) % 2 == 0 ? 0 : -math.pi / 2,
+      // if (direction == "1") {
+      //   offset = Offset(offsetFactor, 0);
+      // } else if (direction == "3") {
+      //   offset = Offset(-offsetFactor, 0);
+      // }
+
+      return Align(
+        alignment: alignment,
+        child: RotatedBox(
+          quarterTurns:
+              int.parse(direction) % 2 == 0 ? 0 : -int.parse(direction),
           child: EmptyButton(
             () {
               setState(
@@ -468,28 +513,28 @@ class _HomeState extends State<Home> {
                   userState = userState.substring(0, userState.length - 1);
                 },
               );
-              checkForQuestion(context);
+              // checkForQuestion(context);
             },
-            'Back',
+            'Back ',
             /* child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: buttonWidth,
-            vertical: buttonHeight,
-          ),
-          decoration: BoxDecoration(
-            color: accentColor,
-            borderRadius: BorderRadius.circular(
-              20000,
+            padding: EdgeInsets.symmetric(
+              horizontal: buttonWidth,
+              vertical: buttonHeight,
             ),
+            decoration: BoxDecoration(
+              color: accentColor,
+              borderRadius: BorderRadius.circular(
+                20000,
+              ),
+            ),
+            child: ButtonText('Back'),
           ),
-          child: ButtonText('Back'),
-        ),
-      ); */
+        ); */
           ),
         ),
       );
     } else {
-      double offsetFactor = 45;
+      double offsetFactor = 90;
       Offset offset = new Offset(0, 0);
 
       if (direction == "1") {
@@ -498,25 +543,48 @@ class _HomeState extends State<Home> {
         offset = Offset(-offsetFactor, 0);
       }
 
-      return Transform.translate(
-        offset: offset,
-        child: Transform.rotate(
-          angle: int.parse(direction) % 2 == 0 ? 0 : -math.pi / 2,
-          child: EmptyButton(
-            () {
-              setState(
-                () {
-                  // userState = userState.substring(0, userState.length - 1);
-                  userState = stateCombine(direction);
-                },
-              );
-              checkForQuestion(context);
-            },
-            // '$direction',
-            // 'TBD',
-            // "${roomNames["${stateCombine(direction)}"]}${stateCombine(direction)}",
-            "${roomNames["${stateCombine(direction)}"]}",
+      return Container(
+        color: Colors.lime,
+        child: Align(
+          alignment: alignment,
+          child:
+              // Align(
+              //   alignment: direction == "1"
+              //       ? Alignment.centerLeft
+              //       : direction == "3"
+              //           ? Alignment.centerRight
+              //           : direction == "0"
+              //               ? Alignment.topCenter
+              //               : Alignment.bottomCenter,
+              //   child:
+              Transform.translate(
+            offset: Offset.zero,
+            // offset: offset,
+            child: Transform.rotate(
+              // angle: int.parse(direction) % 2 == 0 ? 0 : -math.pi / 2,
+              angle: 0,
+              child: RotatedBox(
+                quarterTurns:
+                    int.parse(direction) % 2 == 0 ? 0 : -int.parse(direction),
+                child: EmptyButton(
+                  () {
+                    setState(
+                      () {
+                        // userState = userState.substring(0, userState.length - 1);
+                        userState = stateCombine(direction);
+                      },
+                    );
+                    // checkForQuestion(context);
+                  },
+                  // '$direction',
+                  // 'TBD',
+                  // "${roomNames["${stateCombine(direction)}"]}${stateCombine(direction)}",
+                  "${roomNames["${stateCombine(direction)}"]}",
+                ),
+              ),
+            ),
           ),
+          // ),
         ),
       );
     }
@@ -524,25 +592,26 @@ class _HomeState extends State<Home> {
 
   Widget roomsDisplay() {
     return Container(
+      color: Colors.orange,
       child: Padding(
         padding: EdgeInsets.all(32),
         child: Stack(
           children: [
-            Align(
-              alignment: Alignment.topCenter,
-              child: CustomButton("0"),
+            CustomButton(
+              "0",
+              Alignment.topCenter,
             ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: CustomButton("1"),
+            CustomButton(
+              "1",
+              Alignment.centerRight,
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: CustomButton("2"),
+            CustomButton(
+              "2",
+              Alignment.bottomCenter,
             ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: CustomButton("3"),
+            CustomButton(
+              "3",
+              Alignment.centerLeft,
             ),
           ],
         ),
@@ -550,7 +619,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget navigationPanel() {
+  Widget navigationPanel(int maxFloor) {
     return Container(
       child: Center(
         child: userState == ""
@@ -560,21 +629,168 @@ class _HomeState extends State<Home> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (roomLocationsCollection
-                      .containsKey((currentFloor + 1).toString()))
-                    EmptyButton(() {
-                      setState(() {
-                        currentFloor++;
-                        roomLocations =
-                            roomLocationsCollection[currentFloor.toString()];
-                        roomNames =
-                            roomNamesCollection[currentFloor.toString()];
-                        userState = "";
-                      });
-                      checkForQuestion(context);
-                    }, "Next floor"),
+                      .containsKey((currentFloor).toString()))
+                    maxFloor != currentFloor
+                        ? EmptyButton(
+                            () {
+                              if (roomLocationsCollection
+                                  .containsKey((currentFloor + 1).toString())) {
+                                setState(() {
+                                  currentFloor++;
+                                  roomLocations = roomLocationsCollection[
+                                      currentFloor.toString()];
+                                  roomNames = roomNamesCollection[
+                                      currentFloor.toString()];
+                                  userState = "";
+                                });
+                                checkForQuestion(context);
+                              } else {
+                                Navigator.pushReplacement(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (context) {
+                                      return Credits();
+                                    },
+                                  ),
+                                );
+                              }
+                            },
+                            roomLocationsCollection
+                                    .containsKey((currentFloor + 2).toString())
+                                ? "Next floor"
+                                : roomLocationsCollection.containsKey(
+                                        (currentFloor + 1).toString())
+                                    ? "Final floor"
+                                    : "Finish",
+                          )
+                        : GestureDetector(
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                // builder: nextLevelMenuBuilder,
+                                builder: (context) {
+                                  Map questionsData = questionsCollection[
+                                      currentFloor.toString()];
+                                  List<Widget> textFieldList = [];
+                                  List<TextEditingController> controllers = [];
+                                  for (int i = 0;
+                                      i < questionsData.keys.length;
+                                      i++) {
+                                    String key = questionsData.keys.toList()[i];
+                                    controllers.add(
+                                      new TextEditingController(),
+                                    );
+                                    textFieldList.add(
+                                      EmptyTextField(
+                                        "${roomNames[key].toString()}",
+                                        controllers[i],
+                                        keyboardType: TextInputType.number,
+                                      ),
+                                    );
+                                  }
+                                  return Dialog(
+                                    insetPadding: EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      // vertical: 360,
+                                    ),
+                                    child: Container(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.6,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 32,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            'Answers',
+                                            style: TextStyle(
+                                              color: mainColor,
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 18,
+                                          ),
+                                          ...textFieldList,
+                                          Spacer(),
+                                          Align(
+                                            alignment: Alignment.center,
+                                            child: EmptyButton(
+                                              () async {
+                                                List<int> answers = [];
+                                                for (TextEditingController controller
+                                                    in controllers) {
+                                                  print(
+                                                      "controller text is ${controller.text}");
+                                                  answers.add(
+                                                    int.parse(controller.text),
+                                                  );
+                                                }
+                                                List<int> correctAnswer =
+                                                    answerCheckFormat(
+                                                        answersCollection[
+                                                            currentFloor
+                                                                .toString()]);
+                                                correctAnswer.sort();
+                                                answers.sort();
+                                                print(
+                                                  "correct answer is $correctAnswer",
+                                                );
+                                                print(
+                                                  'user answer is $answers',
+                                                );
+                                                if (correctAnswer.toString() ==
+                                                    answers.toString()) {
+                                                  print(
+                                                      "CORRECT ANSWER WORKS LETS GOOOO");
+                                                  await databaseServices
+                                                      .incrementLevel(
+                                                          currentFloor,
+                                                          widget.uid);
+                                                  FocusScopeNode currentFocus =
+                                                      FocusScope.of(context);
+                                                  currentFocus.unfocus();
+                                                  Navigator.pop(context);
+                                                } else {
+                                                  // Scaffold.of(context)
+                                                  // .showSnackBar(
+                                                  /* CustomSnackBar(
+                                                    context,
+                                                    text: 'Invalid answer',
+                                                    // ),
+                                                  ); */
+                                                  print("INVALID ANSWER");
+                                                }
+                                              },
+                                              'Check',
+                                              inverse: true,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    // ),
+                                  );
+                                },
+                              );
+                            },
+                            child: FractionallySizedBox(
+                              widthFactor: 0.175,
+                              child: Image.asset(
+                                'assets/images/lock.png',
+                              ),
+                            ),
+                          ),
                   Text(
                     // userState,
-                    "\nCurrent Floor: $currentFloor\nRoom: Lobby\n",
+                    "\nCurrent Floor: $currentFloor\nLobby\n",
                     textAlign: TextAlign.center,
                   ),
                   if (roomLocationsCollection
@@ -600,9 +816,17 @@ class _HomeState extends State<Home> {
                   children: [
                     Text(
                       // "Current Floor: $currentFloor\nCurrent room: ${roomNames["$userState"]}",
-                      "Current Floor: $currentFloor\nCurrent room: $userState",
+                      "Current Floor: $currentFloor\n${roomNames[userState]}",
                       textAlign: TextAlign.center,
                     ),
+                    if (questionsCollection[currentFloor.toString()]
+                        .containsKey(userState))
+                      EmptyButton(
+                        () {
+                          checkForQuestion(context);
+                        },
+                        'Question',
+                      )
                   ],
                 ),
               ),
@@ -636,13 +860,16 @@ class _HomeState extends State<Home> {
     List result = await databaseServices.getData();
     roomLocationsCollection = result[0];
     roomLocations = roomLocationsCollection["1"];
+    print(roomLocations);
 
     roomNamesCollection = result[1];
     roomNames = roomNamesCollection[currentFloor.toString()];
 
     questionsCollection = result[2];
 
-    checkForQuestion(context);
+    answersCollection = result[3];
+
+    // checkForQuestion(context);
 
     setState(() {});
   }
@@ -699,12 +926,25 @@ class _HomeState extends State<Home> {
       } else {
         // checkForQuestion(context);
         return Scaffold(
-          body: Stack(
-            children: [
-              lowOpacityImage(),
-              roomsDisplay(),
-              navigationPanel(),
-            ],
+          body: StreamBuilder(
+            stream: databaseServices.getCurrentLevel(widget.uid),
+            builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+              if (snapshot.hasData) {
+                // currentFloor = snapshot.data.data["currentLevel"];
+                // print(snapshot.data.data);
+              }
+              return snapshot.hasData
+                  ? Stack(
+                      children: [
+                        lowOpacityImage(),
+                        roomsDisplay(),
+                        navigationPanel(snapshot.data.data["currentLevel"]),
+                      ],
+                    )
+                  : BackgroundImage(
+                      child: Spinner(),
+                    );
+            },
           ),
         );
       }
