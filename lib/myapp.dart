@@ -485,111 +485,6 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void setTextFieldStates(List<int> userAnswersList, List<int> correctAnswers) {
-    Map<String, int> userAnswers = {};
-    for (int i = 0; i < userAnswersList.length; i++) {
-      print(answerKeys[i]);
-      userAnswers[answerKeys[i].toString()] = userAnswersList[i];
-    }
-    Map correctAnswers = answersCollection[currentFloor.toString()];
-    Map questionsData = questionsCollection[currentFloor.toString()];
-    List<MaterialColor> fieldColors = [];
-    for (int i = 0; i < questionsData.keys.length; i++) {
-      String key = questionsData.keys.toList()[i];
-      // Color fieldColor;
-      if (correctAnswers[key] == userAnswers[key]) {
-        print('Correct => green');
-        fieldColors.add(Colors.green);
-      } else {
-        // print(correctAnswers[key]);
-        // print(userAnswers[key]);
-        print(
-            "Key $key at ${roomNames[key]}: Should be ${correctAnswers[key]}, is ${userAnswers[key]}");
-        print('Incorrect => red');
-        fieldColors.add(Colors.red);
-      }
-      // }
-    }
-    for (int j = 0; j < textFieldList.length; j++) {
-      String key = questionsData.keys.toList()[j];
-      textFieldList[j] =
-          EmptyTextField("${roomNames[key].toString()}", controllers[j],
-              keyboardType: TextInputType.number,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(2000),
-                borderSide: BorderSide(
-                  color: fieldColors[j],
-                  // width: 3,
-                ),
-              )
-              // ),
-              );
-    }
-  }
-
-  bool compareLists(List<int> list1, List<int> list2) {
-    if (list1.length != list2.length) return false;
-    for (int i = 0; i < list1.length; i++) {
-      if (list1[i] != list2[i]) return false;
-    }
-    return true;
-  }
-
-  List<int> answerCheckFormat(/* Map<String, String> */ ans) {
-    List<int> returnAnswer = [];
-    for (String key in ans.keys) {
-      print('ANSWER CHECK FORMAT');
-      print(ans);
-      print(key);
-      print(ans[key.toString()].runtimeType);
-      returnAnswer.add(ans[key.toString()]);
-    }
-    return returnAnswer;
-  }
-
-  Future<void> checkAnswer() async {
-    List<int> answers = [];
-    for (TextEditingController controller in controllers) {
-      print("controller text is ${controller.text}");
-      answers.add(
-        int.parse(controller.text),
-      );
-    }
-    List<int> correctAnswer =
-        answerCheckFormat(answersCollection[currentFloor.toString()]);
-    // correctAnswer.sort();
-    // answers.sort();
-    print(
-      "correct answer is $correctAnswer",
-    );
-    print(
-      'user answer is $answers',
-    );
-    // if (correctAnswer.toString() == answers.toString()) {
-    if (compareLists(correctAnswer, answers)) {
-      print("CORRECT ANSWER WORKS LETS GOOOO");
-      FocusScopeNode currentFocus = FocusScope.of(context);
-      currentFocus.unfocus();
-      Navigator.pop(context);
-      await databaseServices.incrementLevel(currentFloor, widget.uid);
-    } else {
-      print(answers);
-      print('Setting state');
-      super.setState(() {
-        setTextFieldStates(answers, correctAnswer);
-      });
-      // Scaffold.of(context)
-      // .showSnackBar(
-      /* CustomSnackBar(
-                                                                                      context,
-                                                                                      text: 'Invalid answer',
-                                                                                      // ),
-                                                                                    ); */
-      print("INVALID ANSWER");
-      // print(textFieldList);
-    }
-  }
-
   void checkForQuestion(BuildContext context) async {
     await Future.delayed(
       Duration(
@@ -611,46 +506,6 @@ class _HomeState extends State<Home> {
         },
       );
     }
-  }
-
-  Widget checkAnswerDialog(/* BuildContext context */) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.6,
-      padding: EdgeInsets.symmetric(
-        horizontal: 24,
-        vertical: 32,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Answers',
-            style: TextStyle(
-              color: mainColor,
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(
-            height: 18,
-          ),
-          ...textFieldList,
-          Spacer(),
-          Align(
-            alignment: Alignment.center,
-            child: EmptyButton(
-              () async {
-                await checkAnswer();
-                setState(() {});
-              },
-              'Check',
-              inverse: true,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   listToMap(List<int> input, Map<String, String> conversion) {
@@ -874,7 +729,16 @@ class _HomeState extends State<Home> {
                                       horizontal: 24,
                                       // vertical: 360,
                                     ),
-                                    child: checkAnswerDialog(),
+                                    child: AnswerDialog(
+                                      answerKeys: answerKeys,
+                                      answersCollection: answersCollection,
+                                      controllers: controllers,
+                                      currentFloor: currentFloor,
+                                      questionsCollection: questionsCollection,
+                                      roomNames: roomNames,
+                                      textFieldList: textFieldList,
+                                      uid: widget.uid,
+                                    ),
                                     // ),
                                   );
                                 },
@@ -920,11 +784,14 @@ class _HomeState extends State<Home> {
                     ),
                     if (questionsCollection[currentFloor.toString()]
                         .containsKey(userState))
-                      EmptyButton(
-                        () {
-                          checkForQuestion(context);
-                        },
-                        'Question',
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(0, 12, 0, 0),
+                        child: QuestionButton(
+                          () {
+                            checkForQuestion(context);
+                          },
+                          '?',
+                        ),
                       )
                   ],
                 ),
@@ -1034,5 +901,214 @@ class _HomeState extends State<Home> {
         ),
       );
     }
+  }
+}
+
+class AnswerDialog extends StatefulWidget {
+  int currentFloor;
+  String uid;
+  Map answersCollection;
+  Map questionsCollection;
+  Map roomNames;
+  List<TextEditingController> controllers;
+
+  List<Widget> textFieldList;
+  List answerKeys;
+
+  AnswerDialog({
+    @required this.currentFloor,
+    @required this.uid,
+    @required this.answersCollection,
+    @required this.questionsCollection,
+    @required this.roomNames,
+    @required this.controllers,
+    @required this.textFieldList,
+    @required this.answerKeys,
+  });
+
+  @override
+  _AnswerDialogState createState() => _AnswerDialogState();
+}
+
+class _AnswerDialogState extends State<AnswerDialog> {
+  DatabaseServices databaseServices;
+  int currentFloor;
+  String uid;
+  Map answersCollection;
+  Map questionsCollection;
+  Map roomNames;
+  List<TextEditingController> controllers;
+
+  List<Widget> textFieldList;
+  List answerKeys;
+
+  @override
+  void initState() {
+    databaseServices = new DatabaseServices();
+
+    currentFloor = widget.currentFloor;
+    uid = widget.uid;
+    answersCollection = widget.answersCollection;
+    questionsCollection = widget.questionsCollection;
+    roomNames = widget.roomNames;
+    controllers = widget.controllers;
+    textFieldList = widget.textFieldList;
+    answerKeys = widget.answerKeys;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  List<int> answerCheckFormat(/* Map<String, String> */ ans) {
+    List<int> returnAnswer = [];
+    for (String key in ans.keys) {
+      print('ANSWER CHECK FORMAT');
+      print(ans);
+      print(key);
+      print(ans[key.toString()].runtimeType);
+      returnAnswer.add(ans[key.toString()]);
+    }
+    return returnAnswer;
+  }
+
+  bool compareLists(List<int> list1, List<int> list2) {
+    if (list1.length != list2.length) return false;
+    for (int i = 0; i < list1.length; i++) {
+      if (list1[i] != list2[i]) return false;
+    }
+    return true;
+  }
+
+  void setTextFieldStates(List<int> userAnswersList, List<int> correctAnswers) {
+    Map<String, int> userAnswers = {};
+    for (int i = 0; i < userAnswersList.length; i++) {
+      print(answerKeys[i]);
+      userAnswers[answerKeys[i].toString()] = userAnswersList[i];
+    }
+    Map correctAnswers = answersCollection[currentFloor.toString()];
+    Map questionsData = questionsCollection[currentFloor.toString()];
+    List<MaterialColor> fieldColors = [];
+    for (int i = 0; i < questionsData.keys.length; i++) {
+      String key = questionsData.keys.toList()[i];
+      // Color fieldColor;
+      if (correctAnswers[key] == userAnswers[key]) {
+        print('Correct => green');
+        fieldColors.add(Colors.green);
+      } else {
+        // print(correctAnswers[key]);
+        // print(userAnswers[key]);
+        print(
+            "Key $key at ${roomNames[key]}: Should be ${correctAnswers[key]}, is ${userAnswers[key]}");
+        print('Incorrect => red');
+        fieldColors.add(Colors.red);
+      }
+      // }
+    }
+    for (int j = 0; j < textFieldList.length; j++) {
+      String key = questionsData.keys.toList()[j];
+      textFieldList[j] =
+          EmptyTextField("${roomNames[key].toString()}", controllers[j],
+              keyboardType: TextInputType.number,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(2000),
+                borderSide: BorderSide(
+                  color: fieldColors[j],
+                  // width: 3,
+                ),
+              )
+              // ),
+              );
+    }
+  }
+
+  Future<void> checkAnswer() async {
+    List<int> answers = [];
+    for (TextEditingController controller in controllers) {
+      print("controller text is ${controller.text}");
+      answers.add(
+        int.parse(controller.text),
+      );
+    }
+    List<int> correctAnswer =
+        answerCheckFormat(answersCollection[currentFloor.toString()]);
+    // correctAnswer.sort();
+    // answers.sort();
+    print(
+      "correct answer is $correctAnswer",
+    );
+    print(
+      'user answer is $answers',
+    );
+    // if (correctAnswer.toString() == answers.toString()) {
+    if (compareLists(correctAnswer, answers)) {
+      print("CORRECT ANSWER WORKS LETS GOOOO");
+      FocusScopeNode currentFocus = FocusScope.of(context);
+      currentFocus.unfocus();
+      Navigator.pop(context);
+      await databaseServices.incrementLevel(currentFloor, widget.uid);
+    } else {
+      print(answers);
+      print('Setting state');
+      super.setState(() {
+        setTextFieldStates(answers, correctAnswer);
+      });
+      // Scaffold.of(context)
+      // .showSnackBar(
+      /* CustomSnackBar(
+                                                                                      context,
+                                                                                      text: 'Invalid answer',
+                                                                                      // ),
+                                                                                    ); */
+      print("INVALID ANSWER");
+      // print(textFieldList);
+    }
+  }
+
+  Widget checkAnswerDialog(/* BuildContext context */) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.6,
+      padding: EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: 32,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Answers',
+            style: TextStyle(
+              color: mainColor,
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(
+            height: 18,
+          ),
+          ...textFieldList,
+          Spacer(),
+          Align(
+            alignment: Alignment.center,
+            child: EmptyButton(
+              () async {
+                await checkAnswer();
+                setState(() {});
+              },
+              'Check',
+              inverse: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return checkAnswerDialog();
   }
 }

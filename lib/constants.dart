@@ -219,3 +219,35 @@ Widget EmptyTextField(String label, TextEditingController controller,
     ),
   );
 }
+
+Widget QuestionButton(Function onTap, String text) {
+  double size = 42;
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(
+          2000,
+        ),
+        color: accentColor,
+      ),
+      width: size * 4,
+      height: size,
+      child: Center(
+        child:
+            // ButtonText(
+            //   text,
+            //   bold: true,
+            // ),
+            Text(
+          text,
+          style: TextStyle(
+            color: mainColor,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    ),
+  );
+}
