@@ -26,7 +26,7 @@ class Credits extends StatelessWidget {
                 ),
                 SizedBox(height: 24),
                 Text(
-                  "Fantastic! You've finished Round 1, isn't that exciting!\n\nBy the time you're reading this, we've already been notified that you've completed the round, but we recommend you return to Discord and let us know in your team chat. \n\nOf course, keep an eye out in the announcements channel for further updates. We wish you luck in proceeding to Round 2!",
+                  "Fantastic! You've finished Round 1, great job!\n\nBy the time you're reading this, we've already been notified that you've completed the round, but we recommend you return to Discord and let us know in your team chat. \n\nOf course, keep an eye out in the announcements channel for further updates. We wish you luck in proceeding to Round 2!",
                 ),
                 Spacer(),
                 Row(

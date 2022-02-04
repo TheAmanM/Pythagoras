@@ -185,16 +185,18 @@ Widget customTextField(
 }
 
 Widget EmptyTextField(String label, TextEditingController controller,
-    {TextInputType keyboardType = TextInputType.number}) {
-  OutlineInputBorder outlineInputBorder = OutlineInputBorder(
-    borderSide: BorderSide(
-      color: mainColor,
-      width: 1.5,
-    ),
-    borderRadius: BorderRadius.circular(
-      2000,
-    ),
-  );
+    {TextInputType keyboardType = TextInputType.number,
+    OutlineInputBorder border}) {
+  OutlineInputBorder outlineInputBorder = border ??
+      OutlineInputBorder(
+        borderSide: BorderSide(
+          color: mainColor,
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(
+          2000,
+        ),
+      );
   return Padding(
     padding: EdgeInsets.fromLTRB(
       0,
