@@ -52,6 +52,14 @@ class DatabaseServices {
     // return true;
   }
 
+  Future<List<String>> getLatestVersionData() async {
+    DocumentSnapshot data =
+        await firestore.collection('settings').document('settings').get();
+    // print(data.data);
+    // print(data.data['latestVersion']);
+    return [data.data['latestVersion'], data.data['latestVersionLink']];
+  }
+
   Stream<DocumentSnapshot> getCurrentLevel(String userID) {
     print('given userid is $userID');
     return firestore.collection('userData').document(userID).snapshots();

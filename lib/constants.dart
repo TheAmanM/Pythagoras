@@ -10,6 +10,8 @@ Color mainColor = Color(0xFFe9912d);
 Color accentColor = Colors.white;
 Color annoyingRedColor = Colors.red[800];
 
+final String currentVersion = "0.01.07";
+
 Widget ButtonText(String text, {bool bold, bool inverse = false}) {
   if (bold == true) {
     return Text(
@@ -186,7 +188,8 @@ Widget customTextField(
 
 Widget EmptyTextField(String label, TextEditingController controller,
     {TextInputType keyboardType = TextInputType.number,
-    OutlineInputBorder border}) {
+    OutlineInputBorder border,
+    Color color}) {
   OutlineInputBorder outlineInputBorder = border ??
       OutlineInputBorder(
         borderSide: BorderSide(
@@ -197,6 +200,7 @@ Widget EmptyTextField(String label, TextEditingController controller,
           2000,
         ),
       );
+  if (color == null) color = mainColor;
   return Padding(
     padding: EdgeInsets.fromLTRB(
       0,
@@ -209,7 +213,9 @@ Widget EmptyTextField(String label, TextEditingController controller,
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: mainColor.withOpacity(0.6)),
+        labelStyle: TextStyle(
+          color: color.withOpacity(0.6),
+        ),
         // isDense: true,
         border: outlineInputBorder,
         contentPadding: EdgeInsets.fromLTRB(24, 8, 12, 8),

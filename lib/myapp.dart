@@ -1,6 +1,7 @@
 import 'package:bvsso/auth.dart';
 import 'package:bvsso/constants.dart';
 import 'package:bvsso/database.dart';
+import 'package:bvsso/update.dart';
 import 'package:flutter/cupertino.dart';
 // import 'package:bvsso/main.dart';
 import 'credits.dart';
@@ -28,6 +29,8 @@ class _ModeratorWrapperState extends State<ModeratorWrapper> {
   String userid;
   DatabaseServices databaseServices;
   bool isModerator;
+  String latestVersion;
+  String latestVersionLink;
 
   void setUid() {
     // print("setting uid: ${widget.uid}");
@@ -43,10 +46,25 @@ class _ModeratorWrapperState extends State<ModeratorWrapper> {
     setState(() {});
   }
 
+  void getLatestVersionCode() async {
+    List<String> data = await databaseServices.getLatestVersionData();
+    latestVersion = data[0];
+    latestVersionLink = data[1];
+    setState(() {});
+  }
+
+  bool checkVersionIsOld(String currentVersion, String latestVersion) {
+    int currentVersionInt = int.parse(currentVersion.split('.').join());
+    int latestVersionInt = int.parse(latestVersion.split('.').join());
+
+    return currentVersionInt < latestVersionInt;
+  }
+
   @override
   void initState() {
     setUid();
     databaseServices = new DatabaseServices();
+    getLatestVersionCode();
     setModerator();
     super.initState();
   }
@@ -54,53 +72,62 @@ class _ModeratorWrapperState extends State<ModeratorWrapper> {
   @override
   Widget build(BuildContext context) {
     print("data sent is ${widget.user.uid}");
-    if (isModerator == null) {
+    if (isModerator == null || latestVersion == null) {
       return BackgroundImage(
         child: Spinner(),
       );
-    } else if (isModerator == false) {
-      return MyApp(uid: widget.user.uid);
-    } else {
-      return Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          actions: [
-            IconButton(
-              icon: customIcon(
-                Icons.exit_to_app,
-                true,
+    } else if (!checkVersionIsOld(currentVersion, latestVersion)) {
+      if (isModerator == false) {
+        print("current: $currentVersion, latest: $latestVersion");
+        return RoundOne(uid: widget.user.uid);
+      } else {
+        return Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            actions: [
+              IconButton(
+                icon: customIcon(
+                  Icons.exit_to_app,
+                  true,
+                ),
+                onPressed: () async {
+                  await AuthServices().signOut();
+                },
+              )
+            ],
+          ),
+          body: BackgroundImage(
+            child: Center(
+              child: Text(
+                'Mod perms granted\nYou are a legend',
+                textAlign: TextAlign.center,
               ),
-              onPressed: () async {
-                await AuthServices().signOut();
-              },
-            )
-          ],
-        ),
-        body: BackgroundImage(
-          child: Center(
-            child: Text(
-              'Mod perms granted\nYou are a legend',
-              textAlign: TextAlign.center,
             ),
           ),
-        ),
+        );
+      }
+    } else {
+      return Update(
+        currentVersion: currentVersion,
+        latestVersion: latestVersion,
+        latestVersionLink: latestVersionLink,
       );
     }
   }
 }
 
-class MyApp extends StatefulWidget {
+class RoundOne extends StatefulWidget {
   String uid;
 
-  MyApp({
+  RoundOne({
     @required this.uid,
   });
   @override
-  _MyAppState createState() => _MyAppState();
+  _RoundOneState createState() => _RoundOneState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _RoundOneState extends State<RoundOne> {
 /*   VideoPlayerController _controller;
 
   YoutubePlayerController youtubePlayerController = YoutubePlayerController(
@@ -329,15 +356,25 @@ class _MyAppState extends State<MyApp> {
                                       TextSpan(
                                         text:
                                             'We have uploaded an introduction video on YouTube, which you can watch ',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2,
                                       ),
                                       TextSpan(
                                         text: 'here',
-                                        style: TextStyle(
-                                          decoration: TextDecoration.underline,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2
+                                            .copyWith(
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
                                       ),
                                       TextSpan(
                                         text: '. ',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2,
                                         // style: TextStyle(
                                         // decoration: TextDecoration.underline,
                                         // ),
@@ -602,6 +639,8 @@ class _HomeState extends State<Home> {
         offset = Offset(-offsetFactor, 0);
       }
 
+      // print(roomLocationsCollection[currentFloor.toString()]);
+
       return Align(
         alignment: alignment,
         child:
@@ -647,6 +686,8 @@ class _HomeState extends State<Home> {
   }
 
   Widget roomsDisplay() {
+    // print(" ================= ");
+    // print(roomLocations[userState]);
     return Padding(
       padding: EdgeInsets.all(32),
       child: Stack(
@@ -826,12 +867,13 @@ class _HomeState extends State<Home> {
     List result = await databaseServices.getData();
     roomLocationsCollection = result[0];
     roomLocations = roomLocationsCollection["1"];
-    print(roomLocations);
+    // print(roomLocations);
 
     roomNamesCollection = result[1];
     roomNames = roomNamesCollection[currentFloor.toString()];
 
     questionsCollection = result[2];
+    // print(roomLocationsCollection[currentFloor.toString()]);
     prepareCheckAnswer();
     // clearFields();
 
@@ -1009,18 +1051,20 @@ class _AnswerDialogState extends State<AnswerDialog> {
     }
     for (int j = 0; j < textFieldList.length; j++) {
       String key = questionsData.keys.toList()[j];
-      textFieldList[j] =
-          EmptyTextField("${roomNames[key].toString()}", controllers[j],
-              keyboardType: TextInputType.number,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(2000),
-                borderSide: BorderSide(
-                  color: fieldColors[j],
-                  // width: 3,
-                ),
-              )
-              // ),
-              );
+      textFieldList[j] = EmptyTextField(
+        "${roomNames[key].toString()}", controllers[j],
+        keyboardType: TextInputType.number,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(2000),
+          borderSide: BorderSide(
+            color: fieldColors[j],
+            width: 1.5,
+            // width: 3,
+          ),
+        ),
+        color: fieldColors[j],
+        // ),
+      );
     }
   }
 
@@ -1043,18 +1087,23 @@ class _AnswerDialogState extends State<AnswerDialog> {
       'user answer is $answers',
     );
     // if (correctAnswer.toString() == answers.toString()) {
+    super.setState(() {
+      setTextFieldStates(answers, correctAnswer);
+    });
     if (compareLists(correctAnswer, answers)) {
+      await Future.delayed(
+        Duration(
+          milliseconds: 500,
+        ),
+      );
       print("CORRECT ANSWER WORKS LETS GOOOO");
       FocusScopeNode currentFocus = FocusScope.of(context);
       currentFocus.unfocus();
       Navigator.pop(context);
       await databaseServices.incrementLevel(currentFloor, widget.uid);
     } else {
-      print(answers);
+      // print(answers);
       print('Setting state');
-      super.setState(() {
-        setTextFieldStates(answers, correctAnswer);
-      });
       // Scaffold.of(context)
       // .showSnackBar(
       /* CustomSnackBar(
