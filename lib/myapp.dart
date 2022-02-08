@@ -1032,11 +1032,14 @@ class _AnswerDialogState extends State<AnswerDialog> {
     }
     Map correctAnswers = answersCollection[currentFloor.toString()];
     Map questionsData = questionsCollection[currentFloor.toString()];
-    List<MaterialColor> fieldColors = [];
+    List fieldColors = [];
     for (int i = 0; i < questionsData.keys.length; i++) {
       String key = questionsData.keys.toList()[i];
       // Color fieldColor;
-      if (correctAnswers[key] == userAnswers[key]) {
+      if (userAnswers[key] == null) {
+        fieldColors.add(mainColor);
+        print('No color => mainColor');
+      } else if (correctAnswers[key] == userAnswers[key]) {
         print('Correct => green');
         fieldColors.add(Colors.green);
       } else {
@@ -1072,9 +1075,14 @@ class _AnswerDialogState extends State<AnswerDialog> {
     List<int> answers = [];
     for (TextEditingController controller in controllers) {
       print("controller text is ${controller.text}");
-      answers.add(
-        int.parse(controller.text),
-      );
+      try {
+        int fieldValue = int.parse(controller.text);
+        answers.add(
+          fieldValue,
+        );
+      } catch (e) {
+        answers.add(null);
+      }
     }
     List<int> correctAnswer =
         answerCheckFormat(answersCollection[currentFloor.toString()]);
