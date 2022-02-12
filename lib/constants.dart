@@ -70,11 +70,13 @@ Widget EmptyButton(Function onTap, String text, {bool inverse = false}) {
   );
 }
 
-Widget BackgroundImage({Widget child, bool opacityGradientMode = false}) {
+Widget BackgroundImage(
+    {Widget child, bool opacityGradientMode = false, String imageUrl}) {
   return Stack(
     children: [
       lowOpacityImage(
         opacityGradientMode: opacityGradientMode,
+        imageUrl: imageUrl,
       ),
       child,
     ],
@@ -92,28 +94,37 @@ void CustomSnackBar(BuildContext context, {String text}) {
   );
 }
 
-Widget lowOpacityImage({bool opacityGradientMode = false}) => Opacity(
-      opacity: opacityGradientMode ? 0.45 : 0.15,
-      child: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                // 'assets/images/overlay.png',
-                opacityGradientMode
-                    ? 'assets/images/overlayGradient.png'
-                    : "assets/images/overlay.png",
-              ),
-              fit: BoxFit.cover,
-            ),
+Widget lowOpacityImage({bool opacityGradientMode = false, String imageUrl}) =>
+    Opacity(
+      opacity: imageUrl == null
+          ? opacityGradientMode
+              ? 0.45
+              : 0.15
+          : 1.0,
+      // child: SafeArea(
+      child: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: imageUrl == null
+                ? AssetImage(
+                    // 'assets/images/overlay.png',
+                    opacityGradientMode
+                        ? 'assets/images/overlayGradient.png'
+                        : "assets/images/overlay.png",
+                  )
+                : NetworkImage(
+                    imageUrl,
+                  ),
+            fit: BoxFit.cover,
           ),
-          // child: Image.asset(
-          //   'assets/images/overlayGradient2.png',
-          //   // fit: BoxFit.cover,
-          //   // width: double.infinity,
-          //   height: double.infinity,
-          // ),
         ),
+        // child: Image.asset(
+        //   'assets/images/overlayGradient2.png',
+        //   // fit: BoxFit.cover,
+        //   // width: double.infinity,
+        //   height: double.infinity,
+        // ),
+        // ),
       ),
     );
 

@@ -56,7 +56,21 @@ packages:
       name: cloud_firestore
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.12.11"
+    version: "0.13.7"
+  cloud_firestore_platform_interface:
+    dependency: transitive
+    description:
+      name: cloud_firestore_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.2"
+  cloud_firestore_web:
+    dependency: transitive
+    description:
+      name: cloud_firestore_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.1+2"
   collection:
     dependency: transitive
     description:
@@ -132,13 +146,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_inappwebview:
-    dependency: transitive
+  flutter_countdown_timer:
+    dependency: "direct main"
     description:
-      name: flutter_inappwebview
+      name: flutter_countdown_timer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.0+4"
+    version: "3.0.1"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
@@ -198,13 +212,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.0-nullsafety.3"
-  mime:
-    dependency: transitive
+  otp_text_field:
+    dependency: "direct main"
     description:
-      name: mime
+      name: otp_text_field
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.7"
+    version: "1.0.2"
   path:
     dependency: transitive
     description:
@@ -301,13 +315,48 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.0-nullsafety.3"
-  uuid:
-    dependency: transitive
+  url_launcher:
+    dependency: "direct main"
     description:
-      name: uuid
+      name: url_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.2"
+    version: "5.7.10"
+  url_launcher_linux:
+    dependency: transitive
+    description:
+      name: url_launcher_linux
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1+4"
+  url_launcher_macos:
+    dependency: transitive
+    description:
+      name: url_launcher_macos
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1+9"
+  url_launcher_platform_interface:
+    dependency: transitive
+    description:
+      name: url_launcher_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.9"
+  url_launcher_web:
+    dependency: transitive
+    description:
+      name: url_launcher_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.5+3"
+  url_launcher_windows:
+    dependency: transitive
+    description:
+      name: url_launcher_windows
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1+3"
   vector_math:
     dependency: transitive
     description:
@@ -350,13 +399,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.1"
-  youtube_player_flutter:
-    dependency: "direct main"
-    description:
-      name: youtube_player_flutter
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "7.0.0+7"
 sdks:
   dart: ">=2.10.0-110 <2.11.0"
-  flutter: ">=1.12.13+hotfix.5 <2.0.0"
+  flutter: ">=1.22.0 <2.0.0"

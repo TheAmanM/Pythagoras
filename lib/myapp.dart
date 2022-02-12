@@ -1,10 +1,14 @@
 import 'package:bvsso/auth.dart';
 import 'package:bvsso/constants.dart';
 import 'package:bvsso/database.dart';
+import 'package:bvsso/helipad.dart';
+import 'package:bvsso/maintainence.dart';
+import 'package:bvsso/round_3.dart';
 import 'package:bvsso/update.dart';
 import 'package:flutter/cupertino.dart';
 // import 'package:bvsso/main.dart';
-import 'credits.dart';
+// import 'credits.dart';
+import 'round_completion.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +32,10 @@ class _ModeratorWrapperState extends State<ModeratorWrapper> {
   FirebaseUser user;
   String userid;
   DatabaseServices databaseServices;
+
   bool isModerator;
+  int currentRound;
+
   String latestVersion;
   String latestVersionLink;
 
@@ -53,6 +60,11 @@ class _ModeratorWrapperState extends State<ModeratorWrapper> {
     setState(() {});
   }
 
+  void getRoundInfo() async {
+    currentRound = await databaseServices.getRoundInfo();
+    setState(() {});
+  }
+
   bool checkVersionIsOld(String currentVersion, String latestVersion) {
     int currentVersionInt = int.parse(currentVersion.split('.').join());
     int latestVersionInt = int.parse(latestVersion.split('.').join());
@@ -65,6 +77,7 @@ class _ModeratorWrapperState extends State<ModeratorWrapper> {
     setUid();
     databaseServices = new DatabaseServices();
     getLatestVersionCode();
+    getRoundInfo();
     setModerator();
     super.initState();
   }
@@ -72,14 +85,20 @@ class _ModeratorWrapperState extends State<ModeratorWrapper> {
   @override
   Widget build(BuildContext context) {
     print("data sent is ${widget.user.uid}");
-    if (isModerator == null || latestVersion == null) {
+    if (isModerator == null || latestVersion == null || currentRound == null) {
       return BackgroundImage(
         child: Spinner(),
       );
     } else if (!checkVersionIsOld(currentVersion, latestVersion)) {
       if (isModerator == false) {
         print("current: $currentVersion, latest: $latestVersion");
-        return RoundOne(uid: widget.user.uid);
+        if (currentRound == 1) {
+          return RoundOne(uid: widget.user.uid);
+        } else if (currentRound == 3) {
+          return RoundThree();
+        } else {
+          return Maintainence();
+        }
       } else {
         return Scaffold(
           appBar: AppBar(
@@ -156,12 +175,17 @@ class _RoundOneState extends State<RoundOne> {
   } */
 
   bool enableRound1;
+  bool helipadDone;
   String round1Text = "";
+  Map helipadData;
 
   String name;
 
   void setName() async {
-    name = await DatabaseServices().getUserName(widget.uid);
+    DocumentSnapshot userData =
+        await DatabaseServices().getUserData(widget.uid);
+    name = userData.data["name"];
+    helipadDone = userData.data["helipadDone"];
     setState(() {});
   }
 
@@ -180,14 +204,20 @@ class _RoundOneState extends State<RoundOne> {
   }
 
   void setEnableRound1() async {
-    Map round1Data = await DatabaseServices().getRound1Data();
+    List<Map> data = await DatabaseServices().getRound1Data();
+    helipadData = data[1];
+    // print(helipadData);
+    Map round1Data = data[0];
     enableRound1 = round1Data["enableRound1"];
     round1Text = round1Data["introText"];
+    // helipadDone = round1Data["beganHelipad"];
+    // print("helipadDone: $helipadDone");
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    setEnableRound1();
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
@@ -400,8 +430,14 @@ class _RoundOneState extends State<RoundOne> {
                                                 context,
                                                 CupertinoPageRoute(
                                                   builder: (context) {
-                                                    return Home(
-                                                        uid: widget.uid);
+                                                    if (helipadDone == null) {
+                                                      return Spinner();
+                                                    }
+                                                    return helipadDone
+                                                        ? RoundCompletion(
+                                                            roundNumber: 1,
+                                                          )
+                                                        : Home(uid: widget.uid);
                                                   },
                                                 ),
                                               );
@@ -486,6 +522,8 @@ class _HomeState extends State<Home> {
   List<String> textFieldStates = [];
   List<TextEditingController> controllers = [];
   List<String> answerKeys = [];
+
+  Map helipadData;
 
   void clearFields() {
     textFieldList = [];
@@ -745,7 +783,10 @@ class _HomeState extends State<Home> {
                                   context,
                                   CupertinoPageRoute(
                                     builder: (context) {
-                                      return Credits();
+                                      return Helipad(
+                                        userID: widget.uid,
+                                        settingsData: helipadData,
+                                      );
                                     },
                                   ),
                                 );
@@ -757,7 +798,7 @@ class _HomeState extends State<Home> {
                                 : roomLocationsCollection.containsKey(
                                         (currentFloor + 1).toString())
                                     ? "Final floor"
-                                    : "Finish",
+                                    : "Roof",
                           )
                         : GestureDetector(
                             onTap: () {
@@ -879,6 +920,8 @@ class _HomeState extends State<Home> {
 
     answersCollection = result[3];
 
+    helipadData = result[4];
+
     // checkForQuestion(context);
 
     setState(() {});
@@ -897,7 +940,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    if (isModerator == null) {
+    if (isModerator == null || helipadData == null) {
       return Scaffold(
         body: BackgroundImage(
           child: Spinner(),
@@ -924,13 +967,18 @@ class _HomeState extends State<Home> {
               return snapshot.hasData
                   ? Stack(
                       children: [
-                        lowOpacityImage(),
+                        lowOpacityImage(
+                          imageUrl:
+                              "https://i.ibb.co/f1NJBxW/Brick-1-png2852075-A-3-E29-4-EC9-8518-B3735458-D629-Default-HQ.jpg",
+                        ),
                         roomsDisplay(),
                         navigationPanel(snapshot.data.data["currentLevel"]),
                       ],
                     )
                   : BackgroundImage(
                       child: Spinner(),
+                      imageUrl:
+                          "https://i.ibb.co/f1NJBxW/Brick-1-png2852075-A-3-E29-4-EC9-8518-B3735458-D629-Default-HQ.jpg",
                     );
             },
           ),

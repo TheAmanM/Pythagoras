@@ -1,5 +1,6 @@
 import 'package:bvsso/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Update extends StatelessWidget {
   String currentVersion;
@@ -43,9 +44,17 @@ class Update extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     EmptyButton(
-                      () {
+                      () async {
                         // Navigator.pop(context);
-                        print(latestVersionLink);
+                        // print(latestVersionLink);
+                        if (await canLaunch(latestVersionLink)) {
+                          launch(latestVersionLink);
+                        } else {
+                          CustomSnackBar(
+                            context,
+                            text: "Sorry, an unexpected error occured. ",
+                          );
+                        }
                       },
                       "Update app",
                     ),
