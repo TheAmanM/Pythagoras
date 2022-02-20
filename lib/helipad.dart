@@ -161,7 +161,7 @@ class _HelipadState extends State<Helipad> {
                       // Spacer(),
                       SizedBox(height: 24),
                       Divider(
-                        color: accentColor.withOpacity(0.5),
+                        color: accentColor.withOpacity(0.8),
                         indent: 0.2,
                         endIndent: 0.2,
                       ),
@@ -288,7 +288,9 @@ class _HelipadState extends State<Helipad> {
                                     ),
                             )
                           : EmptyButton(
-                              enableButton
+                              enableButton ||
+                                      snapshot.data.data
+                                          .containsKey("remainingTime")
                                   ? () async {
                                       await DatabaseServices().updateUserData(
                                           widget.userID, "helipadDone", true);

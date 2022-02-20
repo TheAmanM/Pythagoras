@@ -92,7 +92,11 @@ class DatabaseServices {
   }
 
   Future<DocumentSnapshot> getUserData(String userID) async {
-    return await firestore.collection('userData').document(userID).get();
+    print(userID);
+    DocumentSnapshot doc =
+        await firestore.collection('userData').document(userID).get();
+    print(doc.data);
+    return doc;
   }
 
   // Round 3 Stuff

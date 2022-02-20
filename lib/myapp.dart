@@ -3,6 +3,7 @@ import 'package:bvsso/constants.dart';
 import 'package:bvsso/database.dart';
 import 'package:bvsso/helipad.dart';
 import 'package:bvsso/maintainence.dart';
+import 'package:bvsso/moderator.dart';
 import 'package:bvsso/round_3.dart';
 import 'package:bvsso/update.dart';
 import 'package:flutter/cupertino.dart';
@@ -93,14 +94,19 @@ class _ModeratorWrapperState extends State<ModeratorWrapper> {
       if (isModerator == false) {
         print("current: $currentVersion, latest: $latestVersion");
         if (currentRound == 1) {
-          return RoundOne(uid: widget.user.uid);
+          return RoundOne(
+            uid: widget.user.uid,
+            email: widget.user.email,
+          );
         } else if (currentRound == 3) {
-          return RoundThree();
+          return RoundThreeHome(
+            uid: widget.user.uid,
+          );
         } else {
           return Maintainence();
         }
       } else {
-        return Scaffold(
+        /* return Scaffold(
           appBar: AppBar(
             elevation: 0,
             backgroundColor: Colors.transparent,
@@ -124,6 +130,10 @@ class _ModeratorWrapperState extends State<ModeratorWrapper> {
               ),
             ),
           ),
+        ); */
+        return Moderator(
+          uid: widget.user.uid,
+          currentRound: currentRound,
         );
       }
     } else {
@@ -138,9 +148,11 @@ class _ModeratorWrapperState extends State<ModeratorWrapper> {
 
 class RoundOne extends StatefulWidget {
   String uid;
+  String email;
 
   RoundOne({
     @required this.uid,
+    @required this.email,
   });
   @override
   _RoundOneState createState() => _RoundOneState();
@@ -174,6 +186,23 @@ class _RoundOneState extends State<RoundOne> {
     }
   } */
 
+  Future<void> setupUserData() async {
+    // String teamCode = widget.email.substring(0, 5).toUpperCase();
+    String teamCode =
+        widget.email.replaceAll(RegExp('@bvsso.com'), '').toUpperCase();
+    print("Team Code: $teamCode");
+
+    await Firestore.instance
+        .collection('userData')
+        .document(widget.uid)
+        .updateData({
+      "currentLevel": 1,
+      "helipadDone": false,
+      "name": teamCode,
+    });
+    setState(() {});
+  }
+
   bool enableRound1;
   bool helipadDone;
   String round1Text = "";
@@ -184,9 +213,27 @@ class _RoundOneState extends State<RoundOne> {
   void setName() async {
     DocumentSnapshot userData =
         await DatabaseServices().getUserData(widget.uid);
-    name = userData.data["name"];
-    helipadDone = userData.data["helipadDone"];
-    setState(() {});
+    try {
+      if (userData.data.containsKey("name")) {
+        name = userData.data["name"];
+        helipadDone = userData.data["helipadDone"];
+      } else {
+        await setupUserData();
+        CustomSnackBar(
+          context,
+          text:
+              'Your account has been initialized siccessfully! Please restart the app to proceed. ',
+        );
+      }
+    } catch (e) {
+      await setupUserData();
+      CustomSnackBar(
+        context,
+        text:
+            'Your account has been initialized siccessfully! Please restart the app to proceed. ',
+      );
+    }
+    // setState(() {});
   }
 
   @override
@@ -425,8 +472,8 @@ class _RoundOneState extends State<RoundOne> {
                                   child: Center(
                                     child: GestureDetector(
                                       onTap: enableRound1
-                                          ? () {
-                                              Navigator.push(
+                                          ? () async {
+                                              await Navigator.push(
                                                 context,
                                                 CupertinoPageRoute(
                                                   builder: (context) {
@@ -441,6 +488,7 @@ class _RoundOneState extends State<RoundOne> {
                                                   },
                                                 ),
                                               );
+                                              setState(() {});
                                             }
                                           : () {
                                               //   Scaffold.of(context).showSnackBar(

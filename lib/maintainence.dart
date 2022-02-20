@@ -26,7 +26,7 @@ class Maintainence extends StatelessWidget {
                 ),
                 SizedBox(height: 24),
                 Text(
-                  "The Pythagoras' Pantheon app is currently in maintainence mode. Please try beginning the round a few minutes later. \n\nIf you still see this issue afterward, please ping a moderator on Discord. ",
+                  "The Pythagoras' Pantheon app is currently in maintainence mode. Please try beginning the round by restarting our app a few minutes later. \n\nIf you still see this issue afterward, please ping a moderator on Discord. ",
                 ),
                 Spacer(),
                 /* Row(

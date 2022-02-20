@@ -197,10 +197,14 @@ Widget customTextField(
   );
 }
 
-Widget EmptyTextField(String label, TextEditingController controller,
-    {TextInputType keyboardType = TextInputType.number,
-    OutlineInputBorder border,
-    Color color}) {
+Widget EmptyTextField(
+  String label,
+  TextEditingController controller, {
+  TextInputType keyboardType = TextInputType.number,
+  OutlineInputBorder border,
+  Color color,
+  IconButton suffix,
+}) {
   OutlineInputBorder outlineInputBorder = border ??
       OutlineInputBorder(
         borderSide: BorderSide(
@@ -223,6 +227,8 @@ Widget EmptyTextField(String label, TextEditingController controller,
       keyboardType: keyboardType,
       controller: controller,
       decoration: InputDecoration(
+        // isDense: true,
+        suffix: suffix,
         labelText: label,
         labelStyle: TextStyle(
           color: color.withOpacity(0.6),
